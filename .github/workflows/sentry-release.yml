@@ -1,0 +1,36 @@
+name: Sentry Release
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: {}
+
+jobs:
+  upload-sourcemaps:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build
+        run: pnpm build
+
+      - name: Prepare Sentry release
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+        run: |
+          export SENTRY_RELEASE=$(git rev-parse --short HEAD)
+          npx @sentry/cli releases -o $SENTRY_ORG -p $SENTRY_PROJECT new $SENTRY_RELEASE
+          npx @sentry/cli releases -o $SENTRY_ORG -p $SENTRY_PROJECT files $SENTRY_RELEASE upload-sourcemaps .next --rewrite --url-prefix '~/_next'
+          npx @sentry/cli releases -o $SENTRY_ORG -p $SENTRY_PROJECT finalize $SENTRY_RELEASE
