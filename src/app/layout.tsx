@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import '../../sentry.client.config';
 import { WalletProvider } from "../context/WalletProvider";
 
 const satoshi = localFont({
