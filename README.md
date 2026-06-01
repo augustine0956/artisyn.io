@@ -38,3 +38,28 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+
+## Sentry error tracking
+
+This project includes optional Sentry integration to capture runtime errors and upload source maps during CI releases.
+
+Setup:
+
+- Add repository secrets in GitHub: `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT`.
+- Configure `NEXT_PUBLIC_SENTRY_DSN` (client) and/or `SENTRY_DSN` (server) in your environment or deployment.
+- The CI workflow `.github/workflows/sentry-release.yml` uploads source maps on push to `main`.
+
+Local testing:
+
+1. Install dependencies and build:
+```bash
+pnpm install
+pnpm build
+```
+2. Set `SENTRY_RELEASE` before running source-map upload steps in CI. The workflow uses the git SHA by default.
+
+Privacy & quota:
+
+- `beforeSend` hooks in `sentry.client.config.js` and `sentry.server.config.js` are available to strip PII.
+- Keep `SENTRY_TRACES_SAMPLE_RATE` low in production to limit performance tracing and quota usage.
+
